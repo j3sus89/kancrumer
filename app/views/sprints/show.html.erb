@@ -1,0 +1,184 @@
+<script>
+$(document).ready(function() {
+	$( ".column" ).sortable({
+    connectWith: ".column",
+    handle: ".portlet-header",
+    cancel: ".portlet-toggle",
+    placeholder: "portlet-placeholder ui-corner-all"
+  });
+
+  $( ".portlet" )
+  .addClass( "ui-widget ui-widget-content ui-helper-clearfix ui-corner-all" )
+  .find( ".portlet-header" )
+  .addClass( "ui-widget-header ui-corner-all" )
+  .prepend( "<span class='ui-icon ui-icon-minusthick portlet-toggle'></span>");
+
+  $( ".portlet-toggle" ).click(function() {
+    var icon = $( this );
+    icon.toggleClass( "ui-icon-minusthick ui-icon-plusthick" );
+    icon.closest( ".portlet" ).find( ".portlet-content" ).toggle();
+  });
+
+  $('.column').sortable(
+    { connectWith: '.column' },
+    {	update: function(event, ui) {
+      var postData = "";
+      postData += ($(this).attr('id')+':'+$(this).sortable("toArray"));
+      console.log(postData);
+
+      $.ajax({ url: "<%= @sprint._id %>" +'/saveOrder',
+        type: 'PUT',
+        beforeSend: function(xhr) {xhr.setRequestHeader('X-CSRF-Token', $('meta[name="csrf-token"]').attr('content'))},
+        data: {data: postData},
+        success: function(response) {
+          alert(msj);
+        }
+      });
+    }
+  });
+
+  $('#dialog_form1').hide();
+  $('#edit_floating').click(function() {
+    $('#dialog_form1').dialog( {
+      show : "slide",
+      hide : "toggle",
+      width: 800,
+      height: 670,
+      modal: true,
+      title: "Editing the Sprint"});
+    return false
+  });
+
+  $('#dialog_form2').hide();
+  $('#new_floating').click(function() {
+    $('#dialog_form2').dialog( {
+      show : "slide",
+      hide : "toggle",
+      width: 800,
+      height: 550,
+      modal: true,
+      title: "Adding a User Story"});
+    return false
+  });
+
+});
+</script>
+
+
+<div id="dialog_form1">
+  <%= render :template => 'sprints/edit.html.erb' %>
+</div>
+
+<div id="dialog_form2">
+  <%= form_for([@sprint.project, @sprint, UserStory.new]) do |f| %>
+
+  <div class="field">
+  <%= f.label :code %>
+  <%= f.text_field :code %>
+  </div>
+
+  <div class="field">
+    <%= f.label :title %>
+    <%= f.text_field :title %>
+  </div>
+
+  <div class="field">
+    <%= f.label :description %>
+    <%= f.text_area :description %>
+  </div>
+
+    <div class="field">
+  <%= f.label :effort, "Effort (in hours)" %>
+  <%= f.text_field :effort %>
+  </div>
+
+  <%= f.hidden_field :state, :value => 0 %>
+
+  <%= f.hidden_field :verticalOrder, :value => 0 %>
+
+
+  <div class="field">
+  <%= f.label :priority %>
+  <% opciones = { 'Low' => 'Low', 'Medium' => 'Medium', 'High' => 'High' } %>
+  <%= f.select :priority, opciones %>
+  </div>
+
+  <div class="actions">
+    <%= f.submit "Create User Story", class: "btn btn-primary" %>
+  </div>
+  <% end %>
+</div>
+
+
+<div class="span12 well">
+  <h1> <%= @sprint.name %></h1>
+  <br>
+  <em> From <%= @sprint.startdate %> to <%= @sprint.deadline %> </em>
+  <p><br></p>
+  <p> <%= @sprint.description %> </p>
+</div>
+
+
+
+<div class="span12 well">
+  <div class="btn-group btn-group-justified pull-right">
+    <%= link_to '<i class="icon-arrow-left"></i> Back'.html_safe, project_sprints_path(@sprint.project), class: "btn btn-primary" %>
+    <% if @project.isScrumMasterOrProductOwner?(current_user) or current_user.isAdmin? %>
+    <%= link_to '<i class="icon-edit"></i> Edit Sprint'.html_safe, edit_project_sprint_path(@sprint.project, @sprint), class: "btn btn-primary", id: 'edit_floating' %>
+
+    <% end %>
+
+  </div>
+
+    <div class="btn-group btn-group-justified pull-left">
+    <%= link_to '<i class="icon-plus"></i> Add a new User Story'.html_safe, new_project_sprint_user_story_path(@sprint.project, @sprint), class: "btn btn-primary", id: 'new_floating'  %>
+  </div>
+</div>
+
+<div class="span12">
+  <% nombres = ["To be assigned", "Urgent", "Doing", "Done", "Waiting"] %>
+  <% (0..4).each do |n| %>
+  <% if (n==0) %>
+  <div id="center" class="span2">
+    <% else %>
+    <div id="center" class="span2 well">
+      <% end %>
+      <h5> <%= nombres[n] %></h5>
+      <div class="column" id="<%= n %>">
+        <% @sprint.user_stories.find_by_state(n).each do |us| %>
+        <div class="portlet" id="<%= us.id %>" >
+          <div class="portlet-header"> 
+            <%= link_to "#{us.code.first(10)}", [us.sprint.project, us.sprint, us]%>
+            <% if us.comments.size > 0 %>
+            <i class="icon-comment"></i>
+            <% end %>
+          </div>
+          <div class="portlet-content"> 
+            <% if us.priority=="High" %>
+            <span class="badge badge-important"> High </span>
+            <% else %>
+            <% if us.priority=="Medium" %>
+            <span class="badge badge-info"> Medium </span>
+            <% else %>
+            <span class="badge badge-success"> Low </span>
+            <% end %>
+            <% end %><br>
+      <% if us.title.length > 18 %>
+      <%= us.title.first(18)+"..." %>
+      <% else %>
+      <%= us.title %>
+      <% end %>
+
+          </div>
+        </div>
+        <% end %>
+      </div>
+    </div>
+    <% end %>
+  </div>
+</div>
+
+
+  <div class="span11">
+    <h1><br><br></h1>
+  </div>

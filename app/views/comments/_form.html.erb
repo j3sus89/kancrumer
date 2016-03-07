@@ -1,0 +1,38 @@
+<%= form_for([@comment.user_story.sprint.project, @comment.user_story.sprint, @comment.user_story, @comment]) do |f| %>
+  <% if @comment.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@comment.errors.count, "error") %> prohibited this comment from being saved:</h2>
+
+      <ul>
+      <% @comment.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :body, "Text" %>
+    <%= f.text_area :body %>
+  </div>
+
+<% if controller.action_name == 'new' %>
+  <div class="field">
+  <%= f.hidden_field :user, :value => current_user._id %>
+</div>
+<% end %>
+
+<div class="field">
+  <%= f.hidden_field :date, :value => DateTime.now.to_formatted_s(:long_ordinal) %>
+</div>
+
+  <% if controller.action_name == 'edit' %>
+<div class="actions">
+  <%= f.submit "Update Comment", class: "btn btn-default" %>
+</div>
+<% else %>
+<div class="actions">
+  <%= f.submit "Create Comment", class: "btn btn-default" %>
+</div>
+<% end %>
+<% end %>

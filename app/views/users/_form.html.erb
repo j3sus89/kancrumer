@@ -1,0 +1,69 @@
+<%= form_for(@user) do |f| %>
+<% if @user.errors.any? %>
+<div id="error_explanation">
+  <h2><%= pluralize(@user.errors.count, "error") %> prohibited this user from being saved:</h2>
+
+  <ul>
+    <% @user.errors.full_messages.each do |msg| %>
+    <li><%= msg %></li>
+    <% end %>
+  </ul>
+</div>
+<% end %>
+
+<table class="table table-striped">
+  <thead>
+  </thead>
+  <tbody>
+    <tr>
+      <td><%= f.label :name %></td>
+      <td><%= f.text_field :name %></td>
+    </tr>
+
+    <tr>
+      <td><%= f.label :email %></td>
+      <td><%= f.text_field :email %></td>
+    </tr>
+
+    <tr>
+      <td><%= f.label :password %></td>
+      <td><%= f.password_field :password %></td>
+    </tr>
+
+    <tr>
+      <td><%= f.label :password_confirmation %></td>
+      <td><%= f.password_field :password_confirmation %></td>
+    </tr>
+
+    <tr>
+      <td><%= f.label :avatar %></td>
+      <td><%= f.file_field :avatar %></td>
+    </tr>
+
+    <% if controller.action_name == 'show' and current_user.isAdmin? %>
+    <% opciones = { 'Usuario' => 'user', 'Administrador' => 'admin' } %>
+    <tr>
+      <td><%= f.label :role %></td>
+      <td><%= f.select :role, opciones %></td>
+    </tr>
+    <% else %>
+    <%= f.hidden_field :role, :value => "user" %>
+    <% end %>
+
+    <tr>
+      <th colspan="2">
+        <%= button_tag( :class => "btn btn-primary") do %>
+          <i class="icon-circle-arrow-up"></i>
+          <% if controller.action_name == 'new' %>
+            Sign up
+          <% else %>
+            Save User 
+          <% end %>
+        <% end %>
+      </th>
+    </tr>
+
+  </tbody>
+</table>
+
+<% end %>

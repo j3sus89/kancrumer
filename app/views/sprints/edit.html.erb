@@ -1,0 +1,31 @@
+<script>
+$(document).ready(function () {  
+    $( "#datepicker" ).datepicker({
+      dateFormat: 'dd-mm-yy',
+      changeMonth: true,
+      changeYear: true,
+    onSelect: function(selected) {
+          $("#datepicker1").datepicker("option","minDate", selected)
+        }});
+    $( "#datepicker1" ).datepicker({
+      dateFormat: 'dd-mm-yy',
+      changeMonth: true,
+      changeYear: true,
+      onSelect: function(selected) {
+           $("#datepicker").datepicker("option","maxDate", selected)
+        }
+    });
+
+  });
+  </script>
+
+<div class="span12">
+<h1>Editing sprint</h1>
+<%= render 'form' %>
+
+<h1><br></h1>
+<% if @sprint.project.isScrumMaster?(current_user) or current_user.isAdmin? %>
+<h1>Delete this sprint</h1>
+<%= link_to '<i class="icon-trash icon-white"></i> Delete'.html_safe, [@sprint.project, @sprint], :confirm => 'Are you sure?', :method => :delete, class: "btn btn-danger"  %>
+<% end %>
+</div>

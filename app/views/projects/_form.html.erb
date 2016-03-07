@@ -1,0 +1,74 @@
+<%= javascript_include_tag "jquery.tokeninput" %>
+<script type="text/javascript">
+
+$(document).ready(function () {  
+  $('#project_scrumMember').tokenInput('/users.json', { 
+  	crossDomain: false,  
+    prePopulate: $('#project_scrumMember').data('pre'),
+    theme: 'facebook'  
+  });  
+}); 
+</script>
+
+
+<%= form_for(@project) do |f| %>
+<% if @project.errors.any? %>
+<div id="error_explanation">
+	<h2><%= pluralize(@project.errors.count, "error") %> prohibited this project from being saved:</h2>
+
+	<ul>
+		<% @project.errors.full_messages.each do |msg| %>
+		<li><%= msg %></li>
+		<% end %>
+	</ul>
+</div>
+<% end %>
+
+<div class="field">
+	<%= f.label :name %>
+	<%= f.text_field :name %>
+</div>
+
+<div class="field">
+	<%= f.label :description %>
+	<%= f.text_area :description %>
+</div>
+
+<% if controller.action_name == 'edit' %>
+<div class="field">
+	<%= f.label :scrumMaster %>
+	<%= f.select :scrumMaster, options_from_collection_for_select(User.all, '_id', 'name', @project.scrumMaster) %>
+</div>
+<% else %>
+<div class="field">
+	<%= f.hidden_field :scrumMaster, :value => current_user._id %>
+</div>
+<% end %>
+
+<div class="field">
+	<%= f.label :productOwner %>
+	<%= f.select :productOwner, options_from_collection_for_select(User.all, '_id', 'name', @project.productOwner) %>
+</div>
+
+<% if controller.action_name != 'new' %>
+<div class="field">
+	<%= f.label :scrumMember, "Developers" %>
+	<%= f.text_field :scrumMember, "data-pre" => f.object.getDevelopers %>
+</div>
+<% end %>
+
+<% if controller.action_name == 'new' %>
+<div class="actions">
+  <%= f.submit "Create Project", class: "btn btn-primary" %>
+</div>
+<% else %>
+<div class="actions">
+<%= button_tag( :class => "btn btn-primary") do %>
+  <i class="icon-circle-arrow-up"></i> Update Project
+<% end %>
+</div>
+
+
+<% end %>
+</form>
+<% end %>

@@ -1,0 +1,31 @@
+<h1>Listing user_stories</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Title</th>
+      <th>Description</th>
+      <th>Estado</th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @user_stories.each do |user_story| %>
+      <tr>
+        <td><%= user_story.title %></td>
+        <td><%= user_story.description %></td>
+        <td><%= user_story.state %></td>
+        <td><%= link_to 'Show', [user_story.sprint.project, user_story.sprint, user_story] %></td>
+        <td><%= link_to 'Edit', edit_project_sprint_user_story_path(user_story.sprint.project, user_story.sprint, user_story) %></td>
+        <td><%= link_to 'Destroy', [user_story.sprint.project, user_story.sprint, user_story], method: :delete, data: { confirm: 'Are you sure?' } %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+
+<%= link_to 'New User story', new_project_sprint_user_story_path %>

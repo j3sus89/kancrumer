@@ -1,0 +1,195 @@
+<script>
+$(document).ready(function() {  
+  $('#dialog_form1').hide();
+  $('#new_floating').click(function() {
+    $('#dialog_form1').dialog( {
+      show : "slide",
+      hide : "toggle",
+      width: 800,
+      height: 470,
+      modal: true,
+      title: "Starting a new project"});
+    return false
+  });
+});
+</script>
+
+
+<div id="dialog_form1">
+  <h1>New project</h1>
+
+  <%= form_for(Project.new) do |f| %>
+  <div class="field">
+    <%= f.label :name %>
+    <%= f.text_field :name %>
+  </div>
+  <div class="field">
+    <%= f.label :description %>
+    <%= f.text_area :description %>
+  </div>
+  <div class="field">
+    <%= f.hidden_field :scrumMaster, :value => current_user._id %>
+  </div>
+  <div class="field">
+    <%= f.label :productOwner %>
+    <%= f.select :productOwner, options_from_collection_for_select(User.all, '_id', 'name', :productOwner) %>
+  </div>
+  <div class="actions">
+    <%= button_tag( :class => "btn btn-default") do %>
+    <i class="icon-circle-arrow-up"></i> Create Project
+    <% end %>
+  </div>
+</form>
+<% end %>
+
+</div>
+
+<% if current_user.projects.count == 0 and !current_user.isAdmin?%>
+
+<div class="center-block">
+  <div class="hero-unit">
+    <h1>Hello, <%= current_user.name %> </h1>
+    <h6><br></h6>
+    <p class="lead">You can start creating your own software projects based on Scrum and Kanban</p>
+    <h6><br></h6>
+    <%= link_to '<i class="icon-plus"></i> Start a new project'.html_safe, new_project_path, class: "btn btn-large btn-primary", id: 'new_floating' %>
+  </div>
+</div>
+
+<% else %>
+<div class="span11 well">
+  <h1>My projects</h1>
+</div>
+
+<div class="span11 well">
+  <div class="btn-group btn-group-justified pull-right">
+    <%= link_to '<i class="icon-plus"></i> Start a new project'.html_safe, new_project_path, class: "btn btn-primary", id: 'new_floating' %>
+  </div>
+</div>
+
+
+<% if !current_user.isAdmin? %>
+<% if @projectsAsScrumMaster.count > 0 %>
+<div class="span11 well">
+  <h3> <br>Projects as Scrum Master </h3>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Scrummaster</th>
+        <th>Productowner</th>
+        <th>Options</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <% @projectsAsScrumMaster.each do |project| %>
+      <tr>
+        <td><%= project.name %></td>
+        <td><%= project.getScrumMaster.name %></td>
+        <td><%= project.getProductOwner.name %></td>
+        <td><%= link_to '<i class="icon-eye-open"></i> Show'.html_safe, project, class: "btn btn-primary" %></td>
+        <td><%= link_to '<i class="icon-pencil"></i> Edit'.html_safe, edit_project_path(project), class: "btn btn-primary" %></td>
+        <td><%= link_to '<i class="icon-trash icon-white"></i> Delete'.html_safe, project, method: :delete, data: { confirm: 'Are you sure?' }, class: "btn btn-danger" %></td>
+      </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>
+<% end %>
+
+<% if @projectsAsProductOwner.count > 0 %>
+<div class="span11 well">
+  <h3> <br>Projects as Product Owner </h3>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Scrummaster</th>
+        <th>Productowner</th>
+        <th>Options</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <% @projectsAsProductOwner.each do |project| %>
+      <tr>
+        <td><%= project.name %></td>
+        <td><%= project.getScrumMaster.name %></td>
+        <td><%= project.getProductOwner.name %></td>
+        <td><%= link_to '<i class="icon-eye-open"></i> Show'.html_safe, project, class: "btn btn-primary" %></td>
+        <td><%= link_to '<i class="icon-pencil"></i> Edit'.html_safe, edit_project_path(project), class: "btn btn-primary" %></td>
+      </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>
+<% end %>
+
+
+<% if @projectAsScrumMember.count > 0 %>
+<div class="span11 well">
+  <h3> <br>Projects as Scrum Member </h3>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Scrummaster</th>
+        <th>Productowner</th>
+        <th>Options</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <% @projectAsScrumMember.each do |project| %>
+      <tr>
+        <td><%= project.name %></td>
+        <td><%= project.getScrumMaster.name %></td>
+        <td><%= project.getProductOwner.name %></td>
+        <td><%= link_to '<i class="icon-eye-open"></i> Show'.html_safe, project, class: "btn btn-primary" %></td>
+      </tr>
+
+      <% end %>
+    </tbody>
+  </table>
+</div>
+<% end %>
+
+<% else %>
+
+
+<div class="span11 well">
+  <h3> <br>Projects in the system </h3>
+  <% if @allProjects.count == 0 %>
+  <h6> At the moment, there is no projects in the system</h6>
+  <% else %>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Scrummaster</th>
+        <th>Productowner</th>
+        <th>Options</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <% @allProjects.each do |project| %>
+      <tr>
+        <td><%= project.name %></td>
+        <td><%= project.getScrumMaster.name %></td>
+        <td><%= project.getProductOwner.name %></td>
+        <td><%= link_to '<i class="icon-eye-open"></i> Show'.html_safe, project, class: "btn btn-primary" %></td>
+        <td><%= link_to '<i class="icon-pencil"></i> Edit'.html_safe, edit_project_path(project), class: "btn btn-primary" %></td>
+        <td><%= link_to '<i class="icon-trash icon-white"></i> Delete'.html_safe, project, method: :delete, data: { confirm: 'Are you sure?' }, class: "btn btn-danger" %></td>
+      </tr>
+      <% end %>
+    </tbody>
+  </table>
+  <% end %>
+</div>
+<% end %>
+<% end %>
+
+
+

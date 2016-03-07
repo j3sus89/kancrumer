@@ -1,0 +1,200 @@
+<script>
+$(document).ready(function() {
+  var mover = <%= @project.isScrumMasterOrProductOwner?(current_user) or current_user.isAdmin? %>
+  if(mover){
+    $('#sortable').sortable({
+      update: function(event, ui) {
+        var order = []; 
+        $('#sortable li').each( function() {
+          order.push( $(this).attr('id') ); 
+        });
+        var positions = order.join(';')
+
+        $.ajax({ url: "<%= @project._id %>" +'/changeOrder',
+          type: 'PUT',
+          beforeSend: function(xhr) {xhr.setRequestHeader('X-CSRF-Token', $('meta[name="csrf-token"]').attr('content'))},
+          data: {data: positions},
+          success: function(response) {
+            alert(msj);
+          }
+        });
+      }
+    }); 
+  }
+
+  $( "#datepicker" ).datepicker({
+    dateFormat: 'dd-mm-yy',
+    changeMonth: true,
+    changeYear: true,
+    onSelect: function(selected) {
+      $("#datepicker1").datepicker("option","minDate", selected)
+    }});
+  $( "#datepicker1" ).datepicker({
+    dateFormat: 'dd-mm-yy',
+    changeMonth: true,
+    changeYear: true,
+    onSelect: function(selected) {
+     $("#datepicker").datepicker("option","maxDate", selected)
+   }
+ });
+
+  $('#dialog_form').hide();
+  $('#new_floating').click(function() {
+    $('#dialog_form').dialog( {
+      show : "slide",
+      hide : "toggle",
+      width: 800,
+      height: 500,
+      modal: true,
+      title: "Adding a Sprint"
+        }); // To hide the standard close button
+    return false
+  });
+
+});
+</script>
+
+
+<div id="dialog_form">
+  <h1>New sprint</h1>
+  <%= form_for([@project, Sprint.new]) do |f| %>
+
+  <div class="field">
+    <%= f.label :name %>
+    <%= f.text_field :name %>
+  </div>
+  <div class="field">
+    <%= f.label :description %>
+    <%= f.text_area :description %>
+  </div>
+
+  <div class="field">
+    <%= f.label :startdate, "Start Date" %>
+    <%= f.text_field :startdate, id: "datepicker" %>
+  </div>
+
+  <div class="field">
+    <%= f.label :deadline %>
+    <%= f.text_field :deadline, id: "datepicker1" %>
+  </div>
+
+  <div class="actions">
+    <%= button_tag( :class => "btn btn-default") do %>
+    <i class="icon-circle-arrow-up"></i> Create Sprint
+    <% end %>
+  </div>
+
+  <% end %>
+</div>
+
+<div class="container">
+  <div class="span11 well">
+    <h1> <%= @project.name %></h1>
+    <p class="lead"> <%= @project.description %> </p>
+  </div>
+
+  <div class="span11 well">
+    <div class="btn-group btn-group-justified pull-right">
+      <%= link_to '<i class="icon-arrow-left"></i> Back'.html_safe, projects_path, class: "btn btn-primary" %>
+      <% if @project.isScrumMasterOrProductOwner?(current_user) or current_user.isAdmin? %>
+      <%= link_to '<i class="icon-edit"></i> Edit Project'.html_safe, edit_project_path(@project), class: "btn btn-primary" %>
+      <% end %>
+    </div>
+
+
+    <div class="btn-group btn-group-justified pull-left">
+      <% if @project.isScrumMasterOrProductOwner?(current_user) or current_user.isAdmin? %>
+      <%= link_to '<i class="icon-plus"></i> Add a new Sprint'.html_safe, new_project_sprint_path(@project), class: "btn btn-primary", id: 'new_floating'  %>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="span11 well">
+    <div class="span7" >
+
+
+      <h3 class="text-center">Sprints</p></h3>
+
+      <ol id="sortable">
+        <% (1..@project.sprints.count).each do |n| %>
+        <% sp = @project.sprints.find_by_order(n) %>
+        <li class="ui-state-default" id = "<%= sp.id %>" >
+          <h4><%= link_to "#{sp.name}", [sp.project, sp] %></h4>
+          <h3> <%= sp.getCompleteness %>%</h3>
+          <% if sp.startdate!= ""%>
+          <h6>Starting: <%= sp.startdate %></h6>
+          <% end %>
+          <% if sp.deadline!="" %>
+          <h6>Deadline: <%= sp.deadline %></h6>
+          <% end %>
+          <% if sp.getCompleteness==100 %>
+          <h6><span class="label label-important">Closed</span></h6>
+          <% else %>
+          <h6><span class="label label-success">On development</span></h6>
+          <% end %>
+          <p><% if sp.description.length > 55 %>
+            <%= sp.description.first(55)+"..." %>
+            <% else %>
+            <%= sp.description %>
+            <% end %>
+          </p>
+        </li>
+        <% end %>
+      </ol>
+
+    </div>
+
+
+    <div class="span3">
+      <h3 class="text-center">People</h3>
+
+      <h4 class="text-center">Owners</h4>
+      <table class="table table-striped">
+        <thead>
+        </thead>
+
+        <tbody>
+          <tr>
+            <th colspan="2">Scrum Master</th>
+          </tr>
+        </tr>
+        <td><%= @project.getScrumMaster.name %></td>
+        <td><%= mail_to "#{@project.getScrumMaster.email}" %></td>
+      </tr>
+      <tr>
+        <th colspan="2">Product Owner</th>
+      </tr>
+      <tr>
+        <td><%= @project.getProductOwner.name %></td>
+        <td><%= mail_to "#{@project.getProductOwner.email}" %></td>
+      </tr>
+      <% us = @project.user_ids %>
+      <% us.delete(@project.scrumMaster) %>
+      <% us.delete(@project.productOwner) %>
+      <% if us.empty? %>
+        </tbody>
+        </table>
+      <% else %>
+        <tr>
+          <th colspan="2">Scrum Members</th>
+        </tr>
+        <% @project.user_ids.each do |u| %>
+        <% if !u.eql?(@project.getProductOwner._id) and !u.eql?(@project.getScrumMaster._id) %>
+        <tr>
+          <td><%= User.find(u).name %></td>
+          <td><%= mail_to "#{User.find(u).email}" %></td>
+        </tr>
+        <% end %>
+        <% end %>
+        </tbody>
+        </table>
+    <% end %>
+</div>
+
+</div>
+
+<div class="span11">
+  <h1><br><br></h1>
+</div>
+
+</div>

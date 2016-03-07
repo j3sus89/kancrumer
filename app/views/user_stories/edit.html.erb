@@ -1,0 +1,19 @@
+<div class="span11 well">
+<h1>Editing the user story</h1>
+</div>
+<div class="span11 well">
+<div class="btn-group btn-group-justified pull-right">  
+<%= link_to '<i class="icon-eye-open"></i> Show User Story'.html_safe, [@user_story.sprint.project, @user_story.sprint, @user_story], class: "btn btn-primary" %>
+
+</div>
+<h4>Update info</h4>
+<%= render 'form' %>
+
+<% if @user_story.sprint.project.isScrumMaster?(current_user) or current_user.isAdmin? %>
+<h4>Delete User Story</h4>
+<%= link_to '<i class="icon-trash icon-white"></i> Delete'.html_safe, [@user_story.sprint.project, @user_story.sprint, @user_story], method: :delete, data: { confirm: 'Are you sure?' }, class: "btn btn-danger" %>
+<% end %>
+</div>
+
+
+

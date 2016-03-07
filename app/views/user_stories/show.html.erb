@@ -1,0 +1,93 @@
+
+<div class="span11 well">
+  <h1> <%= @user_story.title %></h1>
+  <p><br></p>
+  <p> <%= @user_story.description %> </p>
+  <% if @user_story.effort!=nil%>
+  <h6>Effort: <%= @user_story.effort %> hours</h6>
+  <% end %>
+  <h6><%= @user_story.priority %> Priority</h6>
+</div>
+
+<div class="span11 well">
+  <div class="btn-group btn-group-justified pull-right">
+    <%= link_to '<i class="icon-arrow-left"></i> Back'.html_safe, project_sprint_user_stories_path, class: "btn btn-primary" %>
+    <% if current_user.isAdmin? or @user_story.sprint.project.isScrumMasterOrProductOwner?(current_user) %>
+    <%= link_to '<i class="icon-edit"></i> Edit User Story'.html_safe, edit_project_sprint_user_story_path(@user_story.sprint.project, @user_story.sprint, @user_story), class: "btn btn-primary" %>
+    <% end %>
+  </div>
+</div>
+
+<div class="span11">
+  <div class="span7">
+
+   <h3 class="text-center">Comments</h3>
+
+   <table class="table table-striped ">
+    <thead>
+    </thead>
+    <tbody>
+      <% if @user_story.comments.size > 0 %>
+      <% @user_story.comments.each do |com| %>
+      <tr>
+        <td>
+          <% if com.user != nil %>
+            <h4><%= image_tag com.getUser.avatar.url(:thumb) %> <%= com.getUser.name %></h4> 
+          <% else %>
+            <h4><%= image_tag "/system/users/avatars/default.jpg" %> Deleted user</h4>
+          <% end %>
+          <h6><%= com.body %></h6>
+          at <%= com.date %> 
+          <% if com.isAuthor?(current_user) or current_user.isAdmin? %>
+          <div class="muted">(<%= link_to 'Edit', edit_project_sprint_user_story_comment_path(com.user_story.sprint.project, com.user_story.sprint, com.user_story, com)  %> | <%= link_to 'Destroy', [com.user_story.sprint.project, com.user_story.sprint, com.user_story, com], method: :delete, data: { confirm: 'Are you sure?' } %>)</div> 
+          <% end %>
+        </td>
+      </tr>
+      <% end %>
+      <% end %>
+      <tr>
+        <td>
+          <%= form_for([@user_story.sprint.project, @user_story.sprint, @user_story, Comment.new]) do |f| %>
+          <div class="field">
+            <%= f.label :body, "Text" %>
+            <%= f.text_area :body %>
+          </div>
+          <div class="field">
+            <%= f.hidden_field :user, :value => current_user._id %>
+          </div>
+          <div class="field">
+            <%= f.hidden_field :date, :value => DateTime.now.to_formatted_s(:long_ordinal) %>
+          </div>
+          <div class="actions">
+            <%= f.submit "Add Comment", class: "btn btn-primary" %>
+          </div>
+          <% end %>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+
+<% if  @user_story.responsibles.count>0 %>
+<div class="span3 pull-right">
+  <h3 class="text-center">People assigned</h3>
+  <ul id="gallery" class="gallery ui-helper-reset ui-helper-clearfix">
+    <% @user_story.responsibles.each do |f| %>
+    <% u = User.where(email: f) %>
+    <li class="ui-widget-content">
+      <h5 class="ui-widget-header"><%= User.find(u).name %></h5>
+      <img src="<%= User.find(u).avatar.url(:medium) %>" alt="<%= User.find(u).name %>" width="48" height="36">
+    </li>
+    <% end %>
+  </ul>
+</div>
+<% end %>
+
+
+</div>
+
+
+<div class="span12">
+	<h1><br></h1>
+</div>

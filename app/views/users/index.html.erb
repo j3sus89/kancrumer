@@ -1,0 +1,43 @@
+<h1>Listing users</h1>
+
+<% if current_user.isAdmin? %>
+<div class="table table-condensed">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Image</th>
+        <th>Email</th>
+        <th>Name</th>
+        <th>Role</th>
+        <th>Options</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <% @users.each do |user| %>
+      <tr>
+        <td class="success">
+          <%= image_tag user.avatar.url(:thumb) %>
+        </td>
+        <td><%= mail_to "#{user.email}" %></td>
+        <td><%= user.name %></td>
+        <td><%= user.role %></td>
+        <td>
+          <%= link_to '<i class="icon-arrow-right"></i> Go to user'.html_safe, user, class: "btn btn-primary" %>
+        </td>
+        <td>
+          <%= link_to '<i class="icon-trash icon-white"></i> Delete'.html_safe, user, method: :delete, data: { confirm: 'Are you sure?' }, class: "btn btn-danger" %>
+        </td>
+      </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>
+<% else %>
+<br>You are not allowed to see this page</br>
+<h1> <br> </h1>
+<%= link_to 'Back', root_path, class: "btn btn-default" %>
+<h1> <br> </h1>
+<% end %>
+
+<br>

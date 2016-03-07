@@ -1,0 +1,66 @@
+<%= javascript_include_tag "jquery.tokeninput" %>
+<script type="text/javascript">
+
+$(document).ready(function () {  
+  $('#user_story_us_resp').tokenInput('/users.json', { 
+    crossDomain: false,  
+    prePopulate: $('#user_story_us_resp').data('pre')  
+  });  
+}); 
+</script>
+
+<%= form_for([@user_story.sprint.project, @user_story.sprint, @user_story]) do |f| %>
+
+  <% if @user_story.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@user_story.errors.count, "error") %> prohibited this user_story from being saved:</h2>
+
+      <ul>
+      <% @user_story.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+  <%= f.label :code %>
+  <%= f.text_field :code %>
+  </div>
+
+  <div class="field">
+  <%= f.label :title %>
+  <%= f.text_field :title %>
+  </div>
+
+  <div class="field">
+  <%= f.label :description %>
+  <%= f.text_area :description %>
+  </div>
+
+  <div class="field">
+  <%= f.label :effort, "Effort (in hours)" %>
+  <%= f.text_field :effort %>
+  </div>
+
+  <div class="field">
+  <%= f.label :priority %>
+  <% opciones = { 'Low' => 'Low', 'Medium' => 'Medium', 'High' => 'High' } %>
+  <%= f.select :priority, opciones %>
+  </div>
+
+    <%= f.hidden_field :state, :value => 0 %>
+
+  <%= f.hidden_field :verticalOrder, :value => 0 %>
+
+  <div class="field">
+  <%= f.label :us_resp, "Responsibles" %>
+  <%= f.text_field :us_resp, "data-pre" => f.object.getResponsibles %>
+</div>
+
+  <div class="actions">
+  <%= button_tag( :class => "btn btn-primary") do %>
+  <i class="icon-circle-arrow-up"></i> Save User Story
+<% end %>
+  </div>
+<% end %>

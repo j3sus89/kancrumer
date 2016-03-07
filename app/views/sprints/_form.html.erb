@@ -1,0 +1,60 @@
+<script>
+$(document).ready(function () {  
+  $( "#datepicker" ).datepicker({
+    dateFormat: 'dd-mm-yy',
+    changeMonth: true,
+    changeYear: true,
+    onSelect: function(selected) {
+      $("#datepicker1").datepicker("option","minDate", selected)
+    }});
+  $( "#datepicker1" ).datepicker({
+    dateFormat: 'dd-mm-yy',
+    changeMonth: true,
+    changeYear: true,
+    onSelect: function(selected) {
+     $("#datepicker").datepicker("option","maxDate", selected)
+   }
+ });
+});
+</script>
+
+<%= form_for([@sprint.project, @sprint]) do |f| %>
+
+<% if @sprint.errors.any? %>
+<div id="error_explanation">
+  <h2><%= pluralize(@sprint.errors.count, "error") %> prohibited this sprint from being saved:</h2>
+
+  <ul>
+    <% @sprint.errors.full_messages.each do |msg| %>
+    <li><%= msg %></li>
+    <% end %>
+  </ul>
+</div>
+<% end %>
+
+<div class="field">
+  <%= f.label :name %>
+  <%= f.text_field :name %>
+</div>
+<div class="field">
+  <%= f.label :description %>
+  <%= f.text_area :description %>
+</div>
+
+<div class="field">
+  <%= f.label :startdate, "Start Date" %>
+  <%= f.text_field :startdate, id: "datepicker" %>
+</div>
+
+<div class="field">
+  <%= f.label :deadline %>
+  <%= f.text_field :deadline, id: "datepicker1" %>
+</div>
+
+<div class="actions">
+  <%= button_tag( :class => "btn btn-primary") do %>
+  <i class="icon-circle-arrow-up"></i> Save Sprint
+<% end %>
+
+</div>
+<% end %>

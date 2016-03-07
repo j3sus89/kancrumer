@@ -1,0 +1,53 @@
+
+<div class="span11">
+	<br>
+	<% if @user.projects.count > 0 %>
+	<div class="span4 well pull-right">	
+		<table class="table table-hover">
+			<thead>
+			</thead>
+			<tbody>
+				<h3>User Projects</h3>
+				<% @user.projects.each do |p| %>
+				<tr>
+					<td><%= Project.find(p).name %></td>
+					<td><%= link_to 'Go to this project <i class="icon-arrow-right"></i>'.html_safe, project_path(Project.find(p)), class: "btn btn-primary" %></td>
+				</tr>
+				<% end %>
+			</tbody>
+		</table>
+		<% end %>
+	</div>
+	
+
+	<div class="span6">
+		<div>
+			<p>
+				<%= image_tag @user.avatar.url(:medium) %>
+			</p>
+			<h1>
+				hello, <%= @user.name %>!
+			</h1>
+		</div>
+	</div>
+
+
+	<div class="span7">
+		<div>
+			<h6><br></h6>
+			<h3>
+				Update your info
+			</h3>
+			<%= render 'form' %>
+		</div>
+
+		<div>
+			<h6><br></h6>
+			<h3>
+				Delete your account
+			</h3>
+			<p class="text-left">Notice that it's only possible to delete your account when you aren't Scrum Master or Product Owner on any project. </p>
+			<p><%= link_to 'Destroy account', @user, method: :delete, data: { confirm: 'Are you sure?' }, class: "btn btn-danger" %>	</p>
+		</div>
+	</div>
+</div>
